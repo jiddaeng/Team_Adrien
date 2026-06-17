@@ -1,57 +1,144 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <windows.h>
 
 #define SIZE 6
+#define SLOT_HEIGHT 5
+#define VELOCITY 20
 
-// 1. 번호 생성 함수 (중복 검사 포함)
-void generateNumbers(int lotto[]) {
+HANDLE hConsole;
+
+// 색 설정 함수
+void setColor(int color) {
+    SetConsoleTextAttribute(hConsole, color);
+}
+
+// 1. 로또 번호 생성 (중복 검사)
+void generateLotto(int lotto[]) {
     int i, j;
     srand(time(NULL));
 
     for (i = 0; i < SIZE; i++) {
         lotto[i] = rand() % 45 + 1;
-
-        // 중복 검사
-        for (j = 0; j < i; j++) {
-            if (lotto[i] == lotto[j]) {
-                i--; // 중복이면 다시 생성
+        for (j = 0; j < i; j++) { 
+            if (lotto[i] == lotto[j]) { // 중복 검사
+                i--;
                 break;
             }
         }
     }
 }
 
-// 2. 오름차순 정렬 함수
-void sortNumbers(int lotto[]) {
-    int i, j, temp;
+// 2. 내 번호 입력 (범위 + 중복 검사)
+void inputMyNumbers(int myNum[]) {
+    int i, j, num;
 
-    for (i = 0; i < SIZE - 1; i++) {
-        for (j = i + 1; j < SIZE; j++) {
-            if (lotto[i] > lotto[j]) {
-                temp = lotto[i];
-                lotto[i] = lotto[j];
-                lotto[j] = temp;
+    printf("내 번호 6개 입력 (1~45)\n");
+
+    for (i = 0; i < SIZE; i++) {
+        while (1) {
+            scanf("%d", &num);
+
+            if (num < 1 || num > 45) {
+                printf("범위 오류! 다시 입력: ");
+                continue;
+            }
+
+            for (j = 0; j < i; j++) {
+                if (myNum[j] == num) {
+                    printf("중복 숫자! 다시 입력: ");
+                    break;
+                }
+            }
+
+            if (j == i) {
+                myNum[i] = num;
+                break;
             }
         }
     }
 }
 
-// 3. 출력 함수
-void printNumbers(int lotto[]) {
-    int i;
+// 3. 슬롯머신 멋있는 연출
+void slotDrawAndPrint(int lotto[]) {
+    int revealed[SIZE] = {0};
+    int colors[SIZE];
+    int i, j, k, temp;
+
     for (i = 0; i < SIZE; i++) {
-        printf("%d ", lotto[i]);
+        colors[i] = rand() % 6 + 9; // 밝은 색
     }
-    printf("\n");
+
+    for (i = 0; i < SIZE; i++) { // i는 로또 추첨 개수
+        int temp = lotto[i]+VELOCITY*1 % 45;
+        for (j = 0; j < VELOCITY; j++) { // j는 그냥 연출용
+            system("cls");
+            printf("=== LOTTO SLOT MACHINE ===\n\n");
+
+            // 슬롯 세로 출력
+            for (k = 0; k < SLOT_HEIGHT; k++) {
+                if (k == SLOT_HEIGHT - 3) {
+                    setColor(colors[i]);
+                    printf("   ● %2d\n", temp+k);
+                    setColor(7);
+                } else {
+                    printf("   | %2d\n", temp+k);
+                }
+            }
+            temp += 1;
+            if (temp+3 > 45) temp = 1;
+
+            // 이미 나온 공
+            printf("\n배출된 공: ");
+            for (k = 0; k < i; k++) {
+                setColor(colors[k]);
+                printf("%2d ", revealed[k]);
+                setColor(7);
+            }
+
+            Sleep(10);
+        }
+
+        revealed[i] = lotto[i];
+    }
+
+    // 정렬
+    for (i = 0; i < SIZE - 1; i++) {
+        for (j = i + 1; j < SIZE; j++) {
+            if (revealed[i] > revealed[j]) {
+                temp = revealed[i];
+                revealed[i] = revealed[j];
+                revealed[j] = temp;
+
+                temp = colors[i];
+                colors[i] = colors[j];
+                colors[j] = temp;
+            }
+        }
+    }
+
+    // 최종 출력
+    system("cls");
+    printf("== 최종 당첨 번호 ==\n\n");
+    for (i = 0; i < SIZE; i++) {
+        setColor(colors[i]);
+        printf("● %2d  ", revealed[i]);
+        setColor(7);
+    }
+    printf("\n\n");
+
+    for (i = 0; i < SIZE; i++) {
+        lotto[i] = revealed[i];
+    }
 }
 
-// 4. 등수 제공 함수
-int getRank(int matchCount) {
-    if (matchCount == 6) return 1;
-    else if (matchCount == 5) return 2;
-    else if (matchCount == 4) return 3;
-    else if (matchCount == 3) return 4;
+// 4. 등수 판별
+int getRank(int count) {
+    if (count == 6) return 1;
+    else if (count == 5) return 2;
+    else if (count == 4) return 3;
+    else if (count == 3) return 4;
     else return 5;
 }
 
@@ -59,33 +146,32 @@ int getRank(int matchCount) {
 int main() {
     int lotto[SIZE];
     int myNum[SIZE];
-    int i, j;
+    int used[SIZE] = {0};
     int matchCount = 0;
+    int i, j;
 
-    printf("=== 로또 번호 생성기 ===\n");
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    // 번호 생성
-    generateNumbers(lotto);
-    sortNumbers(lotto);
+    printf("=== 로또 슬롯 머신 ===\n\n");
 
-    // 내 번호 입력
-    printf("내 번호 6개를 입력하세요:\n");
-    for (i = 0; i < SIZE; i++) {
-        scanf("%d", &myNum[i]);
-    }
+    inputMyNumbers(myNum);
 
-    // 맞춘 개수 계산
+    printf("\n엔터를 누르면 추첨 시작...");
+    getchar(); getchar();
+
+    generateLotto(lotto);
+    slotDrawAndPrint(lotto);
+
+    // 순서 무관 비교
     for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++) {
-            if (myNum[i] == lotto[j]) {
+            if (myNum[i] == lotto[j] && used[j] == 0) {
                 matchCount++;
+                used[j] = 1;
+                break;
             }
         }
     }
-
-    // 결과 출력
-    printf("\n생성된 로또 번호: ");
-    printNumbers(lotto);
 
     printf("맞춘 개수: %d\n", matchCount);
     printf("등수: %d등\n", getRank(matchCount));
