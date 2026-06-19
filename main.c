@@ -60,6 +60,23 @@ void inputMyNumbers(int myNum[]) {
     }
 }
 
+void sortNum(int revealed[], int colors[]) {
+        int temp;
+        for (int i = 0; i < SIZE - 1; i++) {
+                for (int j = i + 1; j < SIZE; j++) {
+                if (revealed[i] > revealed[j]) {
+                        temp = revealed[i];
+                        revealed[i] = revealed[j];
+                        revealed[j] = temp;
+
+                        temp = colors[i];
+                        colors[i] = colors[j];
+                        colors[j] = temp;
+                }
+                }
+        }
+}
+
 // 3. 슬롯머신 멋있는 연출
 void slotDrawAndPrint(int lotto[]) {
     int revealed[SIZE] = {0};
@@ -104,19 +121,7 @@ void slotDrawAndPrint(int lotto[]) {
     }
 
     // 정렬
-    for (i = 0; i < SIZE - 1; i++) {
-        for (j = i + 1; j < SIZE; j++) {
-            if (revealed[i] > revealed[j]) {
-                temp = revealed[i];
-                revealed[i] = revealed[j];
-                revealed[j] = temp;
-
-                temp = colors[i];
-                colors[i] = colors[j];
-                colors[j] = temp;
-            }
-        }
-    }
+    sortNum(revealed, colors);
 
     // 최종 출력
     system("cls");
