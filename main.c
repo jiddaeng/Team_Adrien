@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <windows.h>
+#include <math.h>
 
 #define SIZE 6
 #define SLOT_HEIGHT 5
@@ -61,20 +62,23 @@ void inputMyNumbers(int myNum[]) {
 }
 
 void sortNum(int revealed[], int colors[]) {
-        int temp;
-        for (int i = 0; i < SIZE - 1; i++) {
-                for (int j = i + 1; j < SIZE; j++) {
-                if (revealed[i] > revealed[j]) {
-                        temp = revealed[i];
-                        revealed[i] = revealed[j];
-                        revealed[j] = temp;
+    int temp;
 
-                        temp = colors[i];
-                        colors[i] = colors[j];
-                        colors[j] = temp;
-                }
-                }
+    for (int i = 0; i < SIZE - 1; i++) {
+        for (int j = 0; j < SIZE - i - 1; j++) {
+
+            if (revealed[j] > revealed[j + 1]) {
+
+                temp = revealed[j];
+                revealed[j] = revealed[j + 1];
+                revealed[j + 1] = temp;
+
+                temp = colors[j];
+                colors[j] = colors[j + 1];
+                colors[j + 1] = temp;
+            }
         }
+    }
 }
 
 // 3. 슬롯머신 멋있는 연출
@@ -129,7 +133,7 @@ void slotDrawAndPrint(int lotto[]) {
     for (i = 0; i < SIZE; i++) {
         setColor(colors[i]);
         printf("● %2d  ", revealed[i]);
-        setColor(7);
+        setColor(7); // 기본 색, 회색
     }
     printf("\n\n");
 
@@ -147,6 +151,22 @@ int getRank(int count) {
     else return 5;
 }
 
+void showMyNum(int myNum[]) {
+    srand(time(NULL));
+    printf("== 나의 번호 ==\n\n");
+    int color;
+    int colorsForSort[] = {7,7,7,7,7,7};
+    sortNum(myNum, colorsForSort);
+    setColor(color); // 파란색 계열이 1, 3, 9임
+    for (int i=0; i<SIZE; i++) {
+        color = pow(3, rand() % 3);
+        setColor(color);
+        printf("● %2d ", myNum[i]);
+    }
+    setColor(7);
+    printf("\n\n");
+}
+
 // 5. 메인 함수
 int main() {
     int lotto[SIZE];
@@ -156,7 +176,6 @@ int main() {
     int i, j;
 
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
     printf("=== 로또 슬롯 머신 ===\n\n");
 
     inputMyNumbers(myNum);
@@ -166,6 +185,7 @@ int main() {
 
     generateLotto(lotto);
     slotDrawAndPrint(lotto);
+    showMyNum(myNum);
 
     // 순서 무관 비교
     for (i = 0; i < SIZE; i++) {
