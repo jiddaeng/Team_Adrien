@@ -3,6 +3,7 @@
 #include <time.h>
 #include <windows.h>
 #include <math.h>
+#include <string.h>
 
 #define SIZE 6
 #define SLOT_HEIGHT 5
@@ -96,21 +97,24 @@ void slotDrawAndPrint(int lotto[]) {
     int i, j, row;
 
     for (i = 0; i < SIZE; i++) {
-        colors[i] = rand() % 6 + 9; // 밝은 색이 다 9 이상에 있음
+        while (1) {
+            colors[i] = rand() % SIZE + 9;
+            int again = 0;
+            for (int j = 0; j < i; j++) {
+                if (colors[j] == colors[i]) {
+                    again = 1;
+                    break;
+                }
+            }
+            if (!again)
+                break;
+        }
     }
 
     // 초기값 세팅
-    for (i = 0; i < SIZE; i++) {
-        int start = rand() % 45 + 1;
-
-        for (row = 0; row < SLOT_HEIGHT; row++) {
-            // slots[i][row] = start + row;
-            slots[i][row] = 0;
-
-            if (slots[i][row] > 45)
-                slots[i][row] -= 45;
-        }
-    }
+    for (i = 0; i < SIZE; i++){
+        for (row = 0; row < SLOT_HEIGHT; row++) slots[i][row] = 0;
+    }    
 
     // 슬롯 하나씩 멈추기
     for (i = 0; i < SIZE; i++) {
@@ -139,15 +143,16 @@ void slotDrawAndPrint(int lotto[]) {
             // 세로 출력
             for (row = 0; row < SLOT_HEIGHT; row++) {
 
-                for (int col = 0; col < SIZE; col++) {
-
+                for (int col = 0; col <= i; col++) {
                     if (row == 2) {
                         setColor(colors[col]);
                         printf("● %2d ", slots[col][row]);
                         setColor(7);
                     }
                     else {
+                        setColor(colors[col]);
                         printf("  %2d ", slots[col][row]);
+                        setColor(7);
                     }
                 }
 
