@@ -16,6 +16,7 @@ void setColor(int color) {
 }
 
 // 1. 로또 번호 생성 (중복 검사)
+// 양수혁
 void generateLotto(int lotto[]) {
     int i, j;
     srand(time(NULL));
@@ -32,6 +33,7 @@ void generateLotto(int lotto[]) {
 }
 
 // 2. 내 번호 입력 (범위 + 중복 검사)
+// 염유찬
 void inputMyNumbers(int myNum[]) {
     int i, j, num;
 
@@ -61,6 +63,7 @@ void inputMyNumbers(int myNum[]) {
     }
 }
 
+// 양수혁
 void sortNum(int revealed[], int colors[]) {
     int temp;
 
@@ -82,59 +85,108 @@ void sortNum(int revealed[], int colors[]) {
 }
 
 // 3. 슬롯머신 멋있는 연출
+// 안지호
 void slotDrawAndPrint(int lotto[]) {
     int revealed[SIZE] = {0};
     int colors[SIZE];
-    int i, j, k, temp;
+
+    // 슬롯 상태 저장
+    int slots[SIZE][SLOT_HEIGHT];
+
+    int i, j, row;
 
     for (i = 0; i < SIZE; i++) {
-        colors[i] = rand() % 6 + 9; // 밝은 색
+        colors[i] = rand() % 6 + 9; // 밝은 색이 다 9 이상에 있음
     }
 
-    for (i = 0; i < SIZE; i++) { // i는 로또 추첨 개수
-        int temp = lotto[i]+VELOCITY*1 % 45;
-        for (j = 0; j < VELOCITY; j++) { // j는 그냥 연출용
+    // 초기값 세팅
+    for (i = 0; i < SIZE; i++) {
+        int start = rand() % 45 + 1;
+
+        for (row = 0; row < SLOT_HEIGHT; row++) {
+            // slots[i][row] = start + row;
+            slots[i][row] = 0;
+
+            if (slots[i][row] > 45)
+                slots[i][row] -= 45;
+        }
+    }
+
+    // 슬롯 하나씩 멈추기
+    for (i = 0; i < SIZE; i++) {
+
+        int center = (lotto[i] + VELOCITY) % 45;
+        if (center == 0) center = 45;
+
+        for (j = 0; j < VELOCITY; j++) {
+
+            // 현재 i번째 슬롯만 회전
+            for (row = 0; row < SLOT_HEIGHT; row++) {
+
+                slots[i][row] = center + row - 2;
+
+                while (slots[i][row] < 1)
+                    slots[i][row] += 45;
+
+                while (slots[i][row] > 45)
+                    slots[i][row] -= 45;
+            }
+
             system("cls");
+
             printf("=== LOTTO SLOT MACHINE ===\n\n");
 
-            // 슬롯 세로 출력
-            for (k = 0; k < SLOT_HEIGHT; k++) {
-                if (k == SLOT_HEIGHT - 3) {
-                    setColor(colors[i]);
-                    printf("   ● %2d\n", temp+k);
-                    setColor(7);
-                } else {
-                    printf("   | %2d\n", temp+k);
-                }
-            }
-            temp += 1;
-            if (temp+3 > 45) temp = 1;
+            // 세로 출력
+            for (row = 0; row < SLOT_HEIGHT; row++) {
 
-            // 이미 나온 공
+                for (int col = 0; col < SIZE; col++) {
+
+                    if (row == 2) {
+                        setColor(colors[col]);
+                        printf("● %2d ", slots[col][row]);
+                        setColor(7);
+                    }
+                    else {
+                        printf("  %2d ", slots[col][row]);
+                    }
+                }
+
+                printf("\n");
+            }
+
             printf("\n배출된 공: ");
-            for (k = 0; k < i; k++) {
+
+            for (int k = 0; k < i; k++) {
                 setColor(colors[k]);
                 printf("%2d ", revealed[k]);
                 setColor(7);
             }
 
-            Sleep(10);
+            printf("\n");
+
+            center++;
+
+            if (center > 45)
+                center = 1;
+
+            Sleep(30);
         }
 
-        revealed[i] = lotto[i];
+        revealed[i] = slots[i][2];
     }
 
-    // 정렬
     sortNum(revealed, colors);
 
-    // 최종 출력
     system("cls");
+
     printf("== 최종 당첨 번호 ==\n\n");
+
     for (i = 0; i < SIZE; i++) {
         setColor(colors[i]);
-        printf("● %2d  ", revealed[i]);
-        setColor(7); // 기본 색, 회색
+        printf("● %2d ", revealed[i]);
+        setColor(7);
     }
+
     printf("\n\n");
 
     for (i = 0; i < SIZE; i++) {
@@ -143,6 +195,7 @@ void slotDrawAndPrint(int lotto[]) {
 }
 
 // 4. 등수 판별
+// 안지호
 int getRank(int count) {
     if (count == 6) return 1;
     else if (count == 5) return 2;
@@ -151,6 +204,7 @@ int getRank(int count) {
     else return 5;
 }
 
+// 염유찬
 void showMyNum(int myNum[]) {
     srand(time(NULL));
     printf("== 나의 번호 ==\n\n");
