@@ -20,7 +20,8 @@ void setColor(int color) {
 // 양수혁
 void generateLotto(int lotto[]) {
     int i, j;
-    srand(time(NULL));
+    // srand(time(NULL));
+    srand(42);
 
     for (i = 0; i < SIZE; i++) {
         lotto[i] = rand() % 45 + 1;
@@ -85,6 +86,45 @@ void sortNum(int revealed[], int colors[]) {
     }
 }
 
+void drawSlots(int slots[][SLOT_HEIGHT],
+               int revealed[],
+               int colors[],
+               int slotCount)
+{
+    system("cls");
+
+    printf("=== LOTTO SLOT MACHINE ===\n\n");
+
+    for (int row = 0; row < SLOT_HEIGHT; row++) {
+
+        for (int col = 0; col < slotCount; col++) {
+
+            if (row == 2) {
+                setColor(colors[col]);
+                printf("● %2d ", slots[col][row]);
+            }
+            else {
+                setColor(colors[col]);
+                printf("  %2d ", slots[col][row]);
+            }
+
+            setColor(7);
+        }
+
+        printf("\n");
+    }
+
+    printf("\n배출된 공: ");
+
+    for (int i = 0; i < slotCount; i++) {
+        setColor(colors[i]);
+        printf("%2d ", revealed[i]);
+        setColor(7);
+    }
+
+    printf("\n");
+}
+
 // 3. 슬롯머신 멋있는 연출
 // 안지호
 void slotDrawAndPrint(int lotto[]) {
@@ -136,38 +176,7 @@ void slotDrawAndPrint(int lotto[]) {
                     slots[i][row] -= 45;
             }
 
-            system("cls");
-
-            printf("=== LOTTO SLOT MACHINE ===\n\n");
-
-            // 세로 출력
-            for (row = 0; row < SLOT_HEIGHT; row++) {
-
-                for (int col = 0; col <= i; col++) {
-                    if (row == 2) {
-                        setColor(colors[col]);
-                        printf("● %2d ", slots[col][row]);
-                        setColor(7);
-                    }
-                    else {
-                        setColor(colors[col]);
-                        printf("  %2d ", slots[col][row]);
-                        setColor(7);
-                    }
-                }
-
-                printf("\n");
-            }
-
-            printf("\n배출된 공: ");
-
-            for (int k = 0; k < i; k++) {
-                setColor(colors[k]);
-                printf("%2d ", revealed[k]);
-                setColor(7);
-            }
-
-            printf("\n");
+            drawSlots(slots, revealed, colors, i + 1);
 
             center++;
 
@@ -176,13 +185,29 @@ void slotDrawAndPrint(int lotto[]) {
 
             Sleep(30);
         }
-
-        revealed[i] = slots[i][2];
+                revealed[i] = slots[i][2];
     }
+
+    system("cls");
+
+    printf("=== LOTTO SLOT MACHINE ===\n\n");
+
+    printf("배출된 공: ");
+
+    for (int k = 0; k < SIZE; k++) {
+        setColor(colors[k]);
+        printf("%2d ", revealed[k]);
+        setColor(7);
+    }
+
+    printf("\n");
+
+    Sleep(3000);
+
+    system("cls");
 
     sortNum(revealed, colors);
 
-    system("cls");
 
     printf("== 최종 당첨 번호 ==\n\n");
 
@@ -191,7 +216,6 @@ void slotDrawAndPrint(int lotto[]) {
         printf("● %2d ", revealed[i]);
         setColor(7);
     }
-
     printf("\n\n");
 
     for (i = 0; i < SIZE; i++) {
