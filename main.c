@@ -142,38 +142,11 @@ void slotDrawAndPrint(int lotto[]) {
     }
 }
 
-// 4. 등수 판별
-int getRank(int count) {
-    if (count == 6) return 1;
-    else if (count == 5) return 2;
-    else if (count == 4) return 3;
-    else if (count == 3) return 4;
-    else return 5;
-}
-
-void showMyNum(int myNum[]) {
-    srand(time(NULL));
-    printf("== 나의 번호 ==\n\n");
-    int color;
-    int colorsForSort[] = {7,7,7,7,7,7};
-    sortNum(myNum, colorsForSort);
-    setColor(color); // 파란색 계열이 1, 3, 9임
-    for (int i=0; i<SIZE; i++) {
-        color = pow(3, rand() % 3);
-        setColor(color);
-        printf("● %2d ", myNum[i]);
-    }
-    setColor(7);
-    printf("\n\n");
-}
-
 // 5. 메인 함수
 int main() {
     int lotto[SIZE];
     int myNum[SIZE];
-    int used[SIZE] = {0};
     int matchCount = 0;
-    int i, j;
 
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     printf("=== 로또 슬롯 머신 ===\n\n");
@@ -185,21 +158,6 @@ int main() {
 
     generateLotto(lotto);
     slotDrawAndPrint(lotto);
-    showMyNum(myNum);
-
-    // 순서 무관 비교
-    for (i = 0; i < SIZE; i++) {
-        for (j = 0; j < SIZE; j++) {
-            if (myNum[i] == lotto[j] && used[j] == 0) {
-                matchCount++;
-                used[j] = 1;
-                break;
-            }
-        }
-    }
-
-    printf("맞춘 개수: %d\n", matchCount);
-    printf("등수: %d등\n", getRank(matchCount));
 
     return 0;
 }
